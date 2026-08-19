@@ -1,0 +1,65 @@
+# ========================
+# .NET / Backend
+# ========================
+backend/src/**/bin/
+backend/src/**/obj/
+backend/src/**/*.user
+backend/src/**/.vs/
+*.suo
+*.sln.docstates
+*.nupkg
+*.snupkg
+
+# SQL Server database files
+backend/database/
+backend/tmp1/
+*.mdf
+*.ldf
+*.dbmdl
+*.dbproj.schemaview
+
+# Secrets & config overrides
+backend/src/API/appsettings.Development.json
+
+# Docker secrets
+.env
+
+# ========================
+# Node / Frontend
+# ========================
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/.vite/
+
+# ========================
+# OS / Editor
+# ========================
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+
+# VS Code (keep extensions/settings if team-shared, ignore personal)
+.vscode/settings.json
+.vscode/launch.json
+
+# JetBrains
+.idea/
+*.iml
+
+# ========================
+# Generated files
+# ========================
+docs/*.pdf
+*.lscache
+
+# ========================
+# Claude Code
+# ========================
+.claude/
