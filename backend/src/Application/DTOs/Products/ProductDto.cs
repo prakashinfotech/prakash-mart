@@ -1,0 +1,27 @@
+namespace PrakashMart.Application.DTOs.Products;
+
+public record ProductDto(
+    Guid Id,
+    string Name,
+    string Description,
+    decimal Price,
+    decimal? DiscountPercent,
+    string Category,
+    Guid CategoryId,
+    Guid BrandId,
+    string BrandName,
+    string ImageUrl,
+    List<string> ImageUrls,
+    int Stock,
+    decimal Rating,
+    int ReviewCount,
+    Guid SellerId,
+    string SellerName,
+    string? Warranty,
+    string? CountryOfOrigin,
+    string? DispatchInfo,
+    string? ShipsFrom,
+    List<string> Offers,
+    decimal? MinVariantPrice,
+    List<string> ColorOptions,
+    string Slug);

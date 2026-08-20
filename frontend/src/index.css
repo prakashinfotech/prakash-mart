@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --nav-h: 64px;
+    --topbar-h: 34px;
+    --container: 1320px;
+  }
+
+  html {
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    color: #11181C;
+    background: #FAFAFA;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body { margin: 0; min-height: 100vh; }
+
+  a { text-decoration: none; color: inherit; }
+  button { cursor: pointer; border: none; background: none; padding: 0; font: inherit; }
+}
+
+@layer components {
+  /* ── Stagger-in grid reveal ────────────────────────────────── */
+  .stagger-in > * {
+    animation: fadeUp 280ms ease both;
+  }
+  .stagger-in > *:nth-child(1)  { animation-delay: 0ms; }
+  .stagger-in > *:nth-child(2)  { animation-delay: 40ms; }
+  .stagger-in > *:nth-child(3)  { animation-delay: 80ms; }
+  .stagger-in > *:nth-child(4)  { animation-delay: 120ms; }
+  .stagger-in > *:nth-child(5)  { animation-delay: 160ms; }
+  .stagger-in > *:nth-child(6)  { animation-delay: 200ms; }
+  .stagger-in > *:nth-child(n+7) { animation-delay: 240ms; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Marquee ticker ─────────────────────────────────────────── */
+  .marquee-track {
+    display: flex;
+    gap: 40px;
+    animation: marquee 32s linear infinite;
+    white-space: nowrap;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .marquee-wrap:hover .marquee-track { animation-play-state: paused; }
+
+  /* ── Cart drawer slide-in ───────────────────────────────────── */
+  @keyframes slide-in-right {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
+  }
+  .animate-slide-in-right {
+    animation: slide-in-right 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+
+  /* ── Section badge pills ────────────────────────────────────── */
+  .badge-hot      { background: #F31260; color: #fff; }
+  .badge-top      { background: #17C964; color: #fff; }
+  .badge-new      { background: #006FEE; color: #fff; }
+  .badge-trending { background: #7828C8; color: #fff; }
+}
