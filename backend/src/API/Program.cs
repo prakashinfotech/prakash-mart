@@ -110,8 +110,43 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+
+    var connection = db.Database.GetDbConnection();
+    Console.WriteLine("========== DATABASE DEBUG ==========");
+    Console.WriteLine($"DataSource: {connection.DataSource}");
+    Console.WriteLine($"Database:   {connection.Database}");
+
+    await connection.OpenAsync();
+
+    using (var cmd = connection.CreateCommand())
+    {
+        cmd.CommandText = @"
+            SELECT
+                @@SERVERNAME AS ServerName,
+                DB_NAME() AS DatabaseName,
+                SCHEMA_NAME() AS CurrentSchema,
+                OBJECT_SCHEMA_NAME(OBJECT_ID('Products')) AS ProductSchema,
+                COL_LENGTH('dbo.Products', 'Slug') AS SlugLength;
+        ";
+
+        using var reader = await cmd.ExecuteReaderAsync();
+
+        while (await reader.ReadAsync())
+        {
+            Console.WriteLine($"ServerName:    {reader["ServerName"]}");
+            Console.WriteLine($"DatabaseName:  {reader["DatabaseName"]}");
+            Console.WriteLine($"CurrentSchema: {reader["CurrentSchema"]}");
+            Console.WriteLine($"ProductSchema: {reader["ProductSchema"]}");
+            Console.WriteLine($"SlugLength:    {reader["SlugLength"]}");
+        }
+    }
+
+    await connection.CloseAsync();
+
+    Console.WriteLine("===================================");
+
     db.Database.Migrate();
-    await DbSeeder.SeedAsync(db, hasher);
+    //await DbSeeder.SeedAsync(db, hasher);
 }
 
 // ── Middleware pipeline ───────────────────────────────────────────────────────

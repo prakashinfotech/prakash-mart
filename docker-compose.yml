@@ -1,61 +1,116 @@
 services:
 
-  # ── SQL Server ────────────────────────────────────────────────────────────────
+  # ============================================================
+  # SQL SERVER
+  # ============================================================
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: prakashmart-db
+
     environment:
-      SA_PASSWORD: ${DB_PASSWORD}
       ACCEPT_EULA: "Y"
-      MSSQL_PID: Express
+      MSSQL_PID: "Express"
+      MSSQL_SA_PASSWORD: "${DB_PASSWORD}"
+
+    # Only expose SQL Server to localhost.
+    # Do NOT expose SQL Server directly to the Internet.
     ports:
-      - "1433:1433"
+      - "127.0.0.1:1434:1433"
+
     volumes:
       - sqldata:/var/opt/mssql
+
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$SA_PASSWORD\" -Q 'SELECT 1' -b -C -o /dev/null"]
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' -b -C -o /dev/null"
+        ]
       interval: 15s
       timeout: 10s
       retries: 10
       start_period: 30s
 
-  # ── .NET Backend ─────────────────────────────────────────────────────────────
+    restart: unless-stopped
+
+
+  # ============================================================
+  # .NET BACKEND
+  # ============================================================
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+
+    container_name: prakashmart-backend
+
+    # Host Nginx will proxy to this port.
     ports:
-      - "8080:8080"
+      - "127.0.0.1:5008:8080"
+
     environment:
+
+      # ASP.NET
       ASPNETCORE_ENVIRONMENT: Production
+
+      # Database
       ConnectionStrings__DefaultConnection: >-
-        Server=db;Database=prakashmart;User Id=sa;Password=${DB_PASSWORD};
-        TrustServerCertificate=True;MultipleActiveResultSets=true
-      Jwt__Key: ${JWT_KEY}
-      Jwt__Issuer: PrakashMart
-      Jwt__Audience: PrakashMartApp
+        Server=db,1433;
+        Database=prakashmart;
+        User Id=sa;
+        Password=${DB_PASSWORD};
+        TrustServerCertificate=True;
+        MultipleActiveResultSets=true
+
+      # JWT
+      Jwt__Key: "${JWT_KEY}"
+      Jwt__Issuer: "PrakashMart"
+      Jwt__Audience: "PrakashMartApp"
       Jwt__ExpiryMinutes: "10080"
-      Cors__AllowedOrigins__0: "http://localhost"
-      App__FrontendUrl: "http://localhost"
-      Smtp__Host: ${SMTP_HOST:-}
-      Smtp__Port: ${SMTP_PORT:-587}
-      Smtp__EnableSsl: ${SMTP_ENABLE_SSL:-true}
-      Smtp__Username: ${SMTP_USERNAME:-}
-      Smtp__Password: ${SMTP_PASSWORD:-}
-      Smtp__FromEmail: ${SMTP_FROM_EMAIL:-}
+
+      # CORS
+      Cors__AllowedOrigins__0: "${FRONTEND_URL}"
+
+      # Application URL
+      App__FrontendUrl: "${FRONTEND_URL}"
+
+      # SMTP
+      Smtp__Host: "${SMTP_HOST}"
+      Smtp__Port: "${SMTP_PORT}"
+      Smtp__EnableSsl: "${SMTP_ENABLE_SSL}"
+      Smtp__Username: "${SMTP_USERNAME}"
+      Smtp__Password: "${SMTP_PASSWORD}"
+      Smtp__FromEmail: "${SMTP_FROM_EMAIL}"
+
     depends_on:
       db:
         condition: service_healthy
-    restart: on-failure
 
-  # ── React Frontend (Nginx) ────────────────────────────────────────────────────
+    restart: unless-stopped
+
+
+  # ============================================================
+  # REACT FRONTEND
+  # ============================================================
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+
+    container_name: prakashmart-frontend
+
+    # Host Nginx will proxy to this.
     ports:
-      - "80:80"
+      - "127.0.0.1:8084:80"
+
     depends_on:
       - backend
 
+    restart: unless-stopped
+
+
+# ==============================================================
+# PERSISTENT VOLUME
+# ==============================================================
 volumes:
   sqldata:
